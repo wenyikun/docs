@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Vue2与Vue3响应式原理对比 | 前端学习笔记</title>
+    <meta name="generator" content="VuePress 1.4.1">
+    <link rel="icon" href="https://res.vwantu.com/uploads/logo.svg">
+    <meta name="description" content="前端、学习、HTML、CSS、JavaScript、Typescript、Vue等">
+    <link rel="preload" href="/docs/assets/css/0.styles.9a00ca42.css" as="style"><link rel="preload" href="/docs/assets/js/app.eb519099.js" as="script"><link rel="preload" href="/docs/assets/js/2.a7057b3a.js" as="script"><link rel="preload" href="/docs/assets/js/10.cd2c3a34.js" as="script"><link rel="prefetch" href="/docs/assets/js/11.d2f13c3f.js"><link rel="prefetch" href="/docs/assets/js/12.f6d94480.js"><link rel="prefetch" href="/docs/assets/js/3.9b47931b.js"><link rel="prefetch" href="/docs/assets/js/4.4a431452.js"><link rel="prefetch" href="/docs/assets/js/5.b05df5d1.js"><link rel="prefetch" href="/docs/assets/js/6.df25f546.js"><link rel="prefetch" href="/docs/assets/js/7.531020b8.js"><link rel="prefetch" href="/docs/assets/js/8.e6d6dc8b.js"><link rel="prefetch" href="/docs/assets/js/9.020842ae.js">
+    <link rel="stylesheet" href="/docs/assets/css/0.styles.9a00ca42.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/docs/" class="home-link router-link-active"><img src="/docs/logo.svg" alt="前端学习笔记" class="logo"> <span class="site-name can-hide">前端学习笔记</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <!----></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><!---->  <ul class="sidebar-links"><li><section class="sidebar-group depth-0"><p class="sidebar-heading open"><span>Vue3初体验</span> <!----></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/docs/vue3/vue3-start.html" class="sidebar-link">Vue 3.0 项目创建</a></li><li><a href="/docs/vue3/vue3-proxy.html" class="active sidebar-link">Vue2与Vue3响应式原理对比</a><ul class="sidebar-sub-headers"></ul></li><li><a href="/docs/vue3/vue3-composition-api.html" class="sidebar-link">Composition API（组合式 API）</a></li><li><a href="/docs/vue3/vue3-new-api.html" class="sidebar-link">vue3一些新的特性</a></li><li><a href="/docs/vue3/vue3-router-vuex.html" class="sidebar-link">vue-router和vuex在Vue3中的使用</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h3 id="vue2与vue3响应式原理对比"><a href="#vue2与vue3响应式原理对比" class="header-anchor">#</a> Vue2与Vue3响应式原理对比</h3> <p>理解Vue的响应式原理对项目开发避免一些问题很有用。JavaScript中可以侦测到对象数据变化的<code>Object.defineProperty</code>和ES6的<code>Proxy</code>，Vue2使用的就是<code>Object.defineProperty</code>，<code>Object.defineProperty</code>侦测数据变化会有比较多的缺陷；Vue3则是利用了更强大的<code>Proxy</code>，不够完美的是兼容性还不太好。</p> <h4 id="vue2原理分析"><a href="#vue2原理分析" class="header-anchor">#</a> Vue2原理分析</h4> <p>下面先看一下Vue2怎么利用<code>Object.defineProperty</code>拦截数据变化到通知视图更新的。</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">function</span> <span class="token function">observe</span> <span class="token punctuation">(</span><span class="token parameter">obj</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>obj <span class="token operator">===</span> <span class="token keyword">null</span> <span class="token operator">||</span> <span class="token keyword">typeof</span> obj <span class="token operator">!==</span> <span class="token string">'object'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span>
+  <span class="token punctuation">}</span>
+  Object<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token parameter">key</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">defineReactive</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> key<span class="token punctuation">,</span> obj<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">function</span> <span class="token function">defineReactive</span> <span class="token punctuation">(</span><span class="token parameter">obj<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> key<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token keyword">get</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> val
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token keyword">set</span> <span class="token punctuation">(</span>newVal<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>newVal <span class="token operator">===</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 数据未发生改变直接返回</span>
+        <span class="token keyword">return</span>
+      <span class="token punctuation">}</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">视图更新</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+      val <span class="token operator">=</span> newVal
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// 相当于Vue中定义的data</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token punctuation">{</span>
+  a<span class="token operator">:</span> <span class="token number">1</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// 初始化</span>
+<span class="token function">observe</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+<span class="token comment">// 测试数据改变</span>
+data<span class="token punctuation">.</span>a <span class="token operator">=</span> <span class="token number">222</span> <span class="token comment">// 视图更新</span>
+data<span class="token punctuation">.</span>b <span class="token operator">=</span> <span class="token number">333</span> <span class="token comment">// 新增属性，不会触发视图更新</span>
+<span class="token keyword">delete</span> data<span class="token punctuation">.</span>a <span class="token comment">// 删除属性，不会触发视图更新</span>
+</code></pre></div><p>可以看到数据赋值变化时<code>Object.defineProperty</code>可以通过<code>get</code>、<code>set</code>拦截到，所以可以在<code>set</code>里面通知视图更新。当然，源码没有那么简单，但大概就是这么个道理。缺陷也可以看到，新增、删除不能侦测到，这也是我们在Vue2项目中需要用到<code>$set</code>和<code>$delete</code>的原因；还有<code>Object.defineProperty</code>只是针对Object类型数据，并不能侦测到数组的改变，所以数组改变需要另外实现；当然，性能方面也不是太好。</p> <p>数组的侦测怎么来实现？这个时候要从数组的原型方法入手了，数组发生改变的方法有7个：<code>push</code>、<code>pop</code>、<code>unshift</code>、<code>shift</code>、<code>splice</code>、<code>reverse</code>、<code>sort</code>，需要拦截这些方法在里面实现视图更新，可以看下代码。</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">const</span> arrayProto <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token punctuation">.</span>prototype
+<span class="token keyword">const</span> arrayMethods <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>arrayProto<span class="token punctuation">)</span> <span class="token comment">// 拷贝Array的原型</span>
+
+<span class="token keyword">const</span> methodsToPatch <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'push'</span><span class="token punctuation">,</span> <span class="token string">'pop'</span><span class="token punctuation">,</span> <span class="token string">'shift'</span><span class="token punctuation">,</span> <span class="token string">'unshift'</span><span class="token punctuation">,</span> <span class="token string">'splice'</span><span class="token punctuation">,</span> <span class="token string">'sort'</span><span class="token punctuation">,</span> <span class="token string">'reverse'</span><span class="token punctuation">]</span>
+
+methodsToPatch<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span><span class="token parameter">method</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  arrayMethods<span class="token punctuation">[</span>method<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token operator">...</span>args</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'视图更新'</span><span class="token punctuation">)</span>
+    <span class="token comment">// 返回原来的实现方法</span>
+    <span class="token keyword">return</span> arrayProto<span class="token punctuation">[</span>method<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">apply</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> args<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> arr <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+<span class="token comment">// 替换原型方法</span>
+Object<span class="token punctuation">.</span><span class="token function">setPrototypeOf</span><span class="token punctuation">(</span>arr<span class="token punctuation">,</span> arrayMethods<span class="token punctuation">)</span>
+
+arr<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span> <span class="token comment">// 视图更新</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token comment">// [1, 2, 3, 4]</span>
+</code></pre></div><p>可以看到，通过替换原型方法就可以在调用这些方法时侦测到数据改变，并做出视图更新通知。由于是替换原型方法的原因，所以在Vue2项目中通过索引去修改某个值是不能被侦测到的。</p> <h4 id="vue3原理分析"><a href="#vue3原理分析" class="header-anchor">#</a> Vue3原理分析</h4> <blockquote><p>Proxy 用于修改某些操作的默认行为，等同于在语言层面做出修改，所以属于一种“元编程”（meta programming），即对编程语言进行编程。Proxy 可以理解成，在目标对象之前架设一层“拦截”，外界对该对象的访问，都必须先通过这层拦截，因此提供了一种机制，可以对外界的访问进行过滤和改写。</p></blockquote> <p>那Vue3的<code>Proxy</code>是怎么实现的呢？其实跟<code>Object.defineProperty</code>是类似的，不过<code>Proxy</code>可以做到的更多，可以侦测到对象属性的增加、修改、删除，还可以侦测到数组的改变。看看代码：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">function</span> <span class="token function">reactive</span> <span class="token punctuation">(</span><span class="token parameter">obj</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Proxy</span><span class="token punctuation">(</span>obj<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token keyword">get</span> <span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> Reflect<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token keyword">set</span> <span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token class-name">Object</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span><span class="token function">hasOwnProperty</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'新增'</span><span class="token punctuation">)</span>
+      <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'修改'</span><span class="token punctuation">)</span>
+      <span class="token punctuation">}</span>
+      <span class="token keyword">const</span> result <span class="token operator">=</span> Reflect<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">,</span> val<span class="token punctuation">)</span>
+      <span class="token keyword">return</span> result
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function">deleteProperty</span> <span class="token punctuation">(</span><span class="token parameter">target<span class="token punctuation">,</span> key</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'删除'</span><span class="token punctuation">)</span>
+      Reflect<span class="token punctuation">.</span><span class="token function">deleteProperty</span><span class="token punctuation">(</span>target<span class="token punctuation">,</span> key<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token function">reactive</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  a<span class="token operator">:</span> <span class="token number">1</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+data<span class="token punctuation">.</span>a <span class="token operator">=</span> <span class="token number">2</span> <span class="token comment">// 修改</span>
+data<span class="token punctuation">.</span>b <span class="token operator">=</span> <span class="token number">3</span> <span class="token comment">// 新增</span>
+<span class="token keyword">delete</span> data<span class="token punctuation">.</span>a <span class="token comment">// 删除</span>
+</code></pre></div><p>上面就是Vue3中数据的侦测原理，Vue3项目中改变数据不用考虑用不同的方式了，赋值就能实现响应数据驱动视图更新。</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/docs/vue3/vue3-start.html" class="prev">
+        Vue 3.0 项目创建
+      </a></span> <span class="next"><a href="/docs/vue3/vue3-composition-api.html">
+        Composition API（组合式 API）
+      </a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/docs/assets/js/app.eb519099.js" defer></script><script src="/docs/assets/js/2.a7057b3a.js" defer></script><script src="/docs/assets/js/10.cd2c3a34.js" defer></script>
+  </body>
+</html>
