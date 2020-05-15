@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>vue-router和vuex在Vue3中的使用 | 前端学习笔记</title>
+    <meta name="generator" content="VuePress 1.5.0">
+    <link rel="icon" href="https://res.vwantu.com/uploads/logo.svg">
+    <meta name="description" content="前端、学习、HTML、CSS、JavaScript、Typescript、Vue等">
+    <link rel="preload" href="/vue/assets/css/0.styles.1116ae40.css" as="style"><link rel="preload" href="/vue/assets/js/app.aa48c8de.js" as="script"><link rel="preload" href="/vue/assets/js/2.5b3c8d6b.js" as="script"><link rel="preload" href="/vue/assets/js/9.69291fb7.js" as="script"><link rel="prefetch" href="/vue/assets/js/10.7ae67622.js"><link rel="prefetch" href="/vue/assets/js/3.07a9d78d.js"><link rel="prefetch" href="/vue/assets/js/4.dc0ee6e1.js"><link rel="prefetch" href="/vue/assets/js/5.bfe54082.js"><link rel="prefetch" href="/vue/assets/js/6.4d211df3.js"><link rel="prefetch" href="/vue/assets/js/7.77235c4f.js"><link rel="prefetch" href="/vue/assets/js/8.c15e4a1e.js">
+    <link rel="stylesheet" href="/vue/assets/css/0.styles.1116ae40.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/vue/" class="home-link router-link-active"><img src="/vue/logo.svg" alt="前端学习笔记" class="logo"> <span class="site-name can-hide">前端学习笔记</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <!----></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><!---->  <ul class="sidebar-links"><li><section class="sidebar-group depth-0"><p class="sidebar-heading open"><span>Vue3初体验</span> <!----></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/vue/vue3/vue3-start.html" class="sidebar-link">Vue 3.0 项目创建</a></li><li><a href="/vue/vue3/vue3-proxy.html" class="sidebar-link">Vue2与Vue3响应式原理对比</a></li><li><a href="/vue/vue3/vue3-composition-api.html" class="sidebar-link">Composition API（组合式 API）</a></li><li><a href="/vue/vue3/vue3-new-api.html" class="sidebar-link">vue3一些新的特性</a></li><li><a href="/vue/vue3/vue3-router-vuex.html" class="active sidebar-link">vue-router和vuex在Vue3中的使用</a><ul class="sidebar-sub-headers"></ul></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h3 id="vue-router和vuex在vue3中的使用"><a href="#vue-router和vuex在vue3中的使用" class="header-anchor">#</a> vue-router和vuex在Vue3中的使用</h3> <p>Vue3中<code>setup</code>是不能使用<code>this</code>访问的，所以之前<code>this.$route</code>、<code>this.$store</code>是不能继续使用的，而要使用新的方式，vue-router和vuex插件内部使用<code>provide</code>和<code>inject</code>依赖注入并暴露一个组合函数。</p> <h4 id="vue-router使用"><a href="#vue-router使用" class="header-anchor">#</a> vue-router使用</h4> <p>看看vue-router的中<code>useApi.ts</code>源码：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> inject <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'vue'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> routerKey<span class="token punctuation">,</span> routeLocationKey <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./injectionSymbols'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Router <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./router'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> RouteLocationNormalizedLoaded <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">useRouter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Router <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">inject</span><span class="token punctuation">(</span>routerKey<span class="token punctuation">)</span><span class="token operator">!</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">useRoute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> RouteLocationNormalizedLoaded <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">inject</span><span class="token punctuation">(</span>routeLocationKey<span class="token punctuation">)</span><span class="token operator">!</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>很明显<code>this.$router</code>和<code>this.$route</code>替代方案就是上面两个函数，在Vue3项目中直接使用：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> useRouter<span class="token punctuation">,</span> useRoute <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'vue-router'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token punctuation">{</span>
+  <span class="token function">setup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> router <span class="token operator">=</span> <span class="token function">useRouter</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">const</span> route <span class="token operator">=</span> <span class="token function">useRoute</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>vue-router钩子函数定义在路由配置里面：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token punctuation">[</span><span class="token punctuation">{</span>
+  path<span class="token operator">:</span> <span class="token string">&quot;/&quot;</span><span class="token punctuation">,</span>
+  name<span class="token operator">:</span> <span class="token string">&quot;Home&quot;</span><span class="token punctuation">,</span>
+  component<span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span>Home<span class="token punctuation">,</span>
+    <span class="token function">beforeRouteEnter</span><span class="token punctuation">(</span><span class="token parameter">to<span class="token punctuation">,</span> <span class="token keyword">from</span><span class="token punctuation">,</span> next</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">]</span>
+</code></pre></div><h4 id="vuex使用"><a href="#vuex使用" class="header-anchor">#</a> vuex使用</h4> <p>vuex暴露了<code>useStore</code>函数在<code>setup</code>中使用：</p> <div class="language-javascript extra-class"><pre class="language-javascript"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> computed <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'vue'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> useStore <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'vuex'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token punctuation">{</span>
+  <span class="token function">setup</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> store <span class="token operator">=</span> <span class="token function">useStore</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+      count<span class="token operator">:</span> <span class="token function">computed</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> store<span class="token punctuation">.</span>state<span class="token punctuation">.</span>count<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// state</span>
+      evenOrOdd<span class="token operator">:</span> <span class="token function">computed</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> store<span class="token punctuation">.</span>getters<span class="token punctuation">.</span>evenOrOdd<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// getters</span>
+      <span class="token function-variable function">increment</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> store<span class="token punctuation">.</span><span class="token function">commit</span><span class="token punctuation">(</span><span class="token string">'increment'</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// commit</span>
+      <span class="token function-variable function">decrement</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> store<span class="token punctuation">.</span><span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token string">'decrement'</span><span class="token punctuation">)</span> <span class="token comment">// dispatch</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre></div></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/vue/vue3/vue3-new-api.html" class="prev">
+        vue3一些新的特性
+      </a></span> <!----></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/vue/assets/js/app.aa48c8de.js" defer></script><script src="/vue/assets/js/2.5b3c8d6b.js" defer></script><script src="/vue/assets/js/9.69291fb7.js" defer></script>
+  </body>
+</html>
